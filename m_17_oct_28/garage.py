@@ -2,7 +2,8 @@ import time
 import uuid
 from csc_125_02_fa25.m_17_oct_28.car import Car
 
-
+# LIFO => Last in first out
+# FIFO => First in first out
 class Garage:
 
     def __init__(self, parking_spaces:int, parking_fee_sec:int, max_parking_time_sec:int) -> None:
@@ -10,6 +11,7 @@ class Garage:
         self.__parking_fee_sec = parking_fee_sec
         self.__max_parking_time_sec = max_parking_time_sec
         self.__garage_dict:dict[str, dict] = {}
+        self.__towed_cars_set: set[str] = set()
 
     def get_parking_fee(self):
         """
@@ -24,7 +26,31 @@ class Garage:
         """
         return self.__max_parking_time_sec
 
+    def __clean_garage(self):
+        current_time: float = time.time()
+
+        # Extra memory
+        # temp_garage_dict = {}
+
+        for ticket, car_dict in self.__garage_dict.items():
+            parked_at = car_dict["parked_at"]
+            total_time_sec = current_time - parked_at
+            if total_time_sec > self.get_max_parking_time():
+                print(f"Towed: {car_dict['car']}")
+                self.__towed_cars_set.add(ticket)
+            # else:
+            #     temp_garage_dict[ticket] = car_dict
+
+        #self.__garage_dict = temp_garage_dict
+
+        for towed_ticket in self.__towed_cars_set:
+            self.__garage_dict.pop(towed_ticket)
+        
+
     def park(self, car:Car) -> str | None:
+
+        if len(self.__garage_dict) >= self.__parking_spaces:
+            self.__clean_garage()
 
         if len(self.__garage_dict) < self.__parking_spaces:
             uid = uuid.uuid4()
@@ -44,7 +70,7 @@ class Garage:
             # was parked
             return None
 
-    def retrieve(self, ticket:str) -> tuple[float |None, Car | None]:
+    def retrieve(self, ticket:str) -> tuple[float |None, Car | None, str | None]:
 
         # Use the get method in the dict to get the car dict safely b/c the
         # ticket might not match to any car.
@@ -62,8 +88,14 @@ class Garage:
             
             # Get the car from the car dict
             car = car_dict["car"]
-            return fee, car
+            return fee, car, "Have a nice day"
+        elif ticket in self.__towed_cars_set:
+            return 1000, None, "Your car was towed..."
 
+        return None, None, "no car found"
 
-        return None, None
-    
+    def __str__(self) -> str:
+
+        utilization = round(len(self.__garage_dict)/self.__parking_spaces, 2)
+
+        return f"Garage: {len(self.__garage_dict)} of {self.__parking_spaces} | {utilization*100}% full"
