@@ -1,0 +1,17 @@
+{
+    "users": {
+        "admin@example.com": {
+            "email": "admin@example.com",
+            "failed_sign_in_attempts": [
+                1763653443,
+                1763653455,
+                1763653466,
+                1763653477,
+                1763653493
+            ],
+            "first_name": "Harris",
+            "last_name": "Williams",
+            "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+        }
+    }
+}
